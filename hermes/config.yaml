@@ -1,0 +1,37 @@
+model:
+  default: "anthropic/claude-sonnet-4-6"
+  provider: "anthropic"
+
+agent:
+  max_turns: 60
+  reasoning_effort: "medium"
+  api_max_retries: 1
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 4000
+  user_char_limit: 2000
+
+group_sessions_per_user: true
+
+session_reset:
+  mode: both
+  idle_minutes: 1440
+  at_hour: 4
+
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: true
+
+platform_toolsets:
+  telegram: [hermes-telegram, session_search]
+
+# IMPORTANT: top-level key must be mcp_servers — NOT mcp.servers (silent failure if wrong)
+mcp_servers:
+  selah:
+    url: "https://selahlearn.com/mcp/selah"
+    headers:
+      Authorization: "Bearer ${SELAH_API_KEY}"
+
+# GitHub MCP block is appended conditionally by entrypoint.sh when GITHUB_TOKEN is set
