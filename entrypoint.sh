@@ -50,11 +50,14 @@ fi
 # Sync cli-config.yaml after all conditional modifications to config.yaml
 cp "$HERMES_HOME/config.yaml" "$HERMES_HOME/cli-config.yaml"
 
-# Export .env into shell environment so Hermes gateway can detect platforms
-set -a
-# shellcheck source=/dev/null
-source "$HERMES_HOME/.env"
-set +a
+# Export platform vars so Hermes gateway can detect messaging platforms
+# (sourcing .env is unsafe — values with spaces break shell parsing)
+export ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
+export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+export TELEGRAM_ALLOWED_USERS="${TELEGRAM_ALLOWED_USERS:-}"
+export TELEGRAM_HOME_CHANNEL="${TELEGRAM_HOME_CHANNEL:-}"
+export TELEGRAM_HOME_CHANNEL_NAME="${TELEGRAM_HOME_CHANNEL_NAME:-}"
+export SELAH_API_KEY="${SELAH_API_KEY:-}"
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
