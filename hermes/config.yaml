@@ -30,7 +30,7 @@ platform_toolsets:
 # IMPORTANT: top-level key must be mcp_servers — NOT mcp.servers (silent failure if wrong)
 mcp_servers:
   selah:
-    url: "https://selah.app/mcp/selah"
+    url: "https://selahlearn.com/mcp/selah"
     headers:
       Authorization: "Bearer ${SELAH_API_KEY}"
 
