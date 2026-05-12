@@ -50,5 +50,11 @@ fi
 # Sync cli-config.yaml after all conditional modifications to config.yaml
 cp "$HERMES_HOME/config.yaml" "$HERMES_HOME/cli-config.yaml"
 
+# Export .env into shell environment so Hermes gateway can detect platforms
+set -a
+# shellcheck source=/dev/null
+source "$HERMES_HOME/.env"
+set +a
+
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
