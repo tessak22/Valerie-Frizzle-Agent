@@ -5,7 +5,7 @@ model:
 agent:
   max_turns: 60
   reasoning_effort: "medium"
-  api_max_retries: 1
+  api_max_retries: 3
 
 memory:
   memory_enabled: true

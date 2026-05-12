@@ -24,8 +24,6 @@ RUN hermes --version
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8443
-
 # tini as PID 1: handles zombie subprocess cleanup for stdio MCP servers
 # Do NOT add startCommand in railway.json — it overrides ENTRYPOINT and prevents tini from running
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/entrypoint.sh"]

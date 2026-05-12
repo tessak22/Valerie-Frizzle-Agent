@@ -20,7 +20,7 @@
           "description": "Your Telegram user ID — message @userinfobot to find it"
         },
         "TELEGRAM_HOME_CHANNEL": {
-          "description": "Your Telegram user ID again (same value — sets your DM as home)"
+          "description": "Your Telegram user ID (same as TELEGRAM_ALLOWED_USERS — this sets your personal DM as Frizzle's home channel)"
         },
         "TELEGRAM_HOME_CHANNEL_NAME": {
           "description": "Your name or a label for the DM (e.g. 'Mom DM')"
