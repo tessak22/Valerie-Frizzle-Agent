@@ -33,5 +33,50 @@ mcp_servers:
     url: "https://selahlearn.com/mcp/selah"
     headers:
       Authorization: "Bearer ${SELAH_API_KEY}"
+    tools:
+      include:
+        - ping
+        - get-students
+        - get-subjects
+        - get-subject-resources
+        - add-subject-resource-link
+        - search-resources
+        - get-platform-resources
+        - get-resource-context
+        - set-resource-selection
+        - update-student-profile
+        - get-schedule
+        - get-standards
+        - get-interests
+        - get-review-items
+        - get-attendance
+        - get-progress
+        - get-gaps
+        - get-ixl-context
+        - get-khan-academy-context
+        - get-evidence
+        - get-achievements
+        - get-coordination
+        - get-suggestions
+        - get-curriculum-plans
+        - get-annual-plan-context
+        - create-activity
+        - update-activity
+        - list-activities
+        - create-curriculum-plan
+        - update-curriculum-plan
+        - schedule-activity
+        - update-schedule-block
+        - create-learning-goal
+        - log-interest
+        - set-mastery-level
+        - steady-path-generate-year
+        - steady-path-preview-year
+        - steady-path-prune-mastered-blocks
+        - schedule-multiple
+        - undo-last-change
+        - get-library-resources
+        - get-library-items
+        - add-library-item
 
 # GitHub MCP block is appended conditionally by entrypoint.sh when GITHUB_TOKEN is set
