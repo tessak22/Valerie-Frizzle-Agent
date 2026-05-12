@@ -12,13 +12,14 @@ mkdir -p "$HERMES_HOME/memories" \
          "$HERMES_HOME/hooks" \
          "$HERMES_HOME/logs"
 
-# Copy config to both filenames — CLI reads cli-config.yaml, gateway reads config.yaml
-cp /app/hermes/config.yaml "$HERMES_HOME/cli-config.yaml"
+# Copy base config — cli-config.yaml will be synced after all conditional modifications below
 cp /app/hermes/config.yaml "$HERMES_HOME/config.yaml"
 
 # Copy agent persona
 cp /app/hermes/SOUL.md "$HERMES_HOME/SOUL.md"
 
+# Empty values are intentional — Hermes ignores them, and the conditional below
+# prevents GitHub MCP registration when GITHUB_TOKEN is unset
 # Write all secrets to ~/.hermes/.env — Hermes reads from here, not system env
 cat > "$HERMES_HOME/.env" << EOF
 ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -43,10 +44,11 @@ if [ -n "${GITHUB_TOKEN:-}" ]; then
     tools:
       include: [create_issue, list_issues, get_issue, search_issues]
 GITHUBBLOCK
-  # Mirror to cli-config.yaml as well
-  cp "$HERMES_HOME/config.yaml" "$HERMES_HOME/cli-config.yaml"
   echo "GitHub MCP enabled."
 fi
+
+# Sync cli-config.yaml after all conditional modifications to config.yaml
+cp "$HERMES_HOME/config.yaml" "$HERMES_HOME/cli-config.yaml"
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
