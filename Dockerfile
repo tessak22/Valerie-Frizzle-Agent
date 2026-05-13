@@ -9,7 +9,7 @@ RUN npm install -g @modelcontextprotocol/server-github
 
 # Pin Hermes to a specific commit for reproducibility
 # To upgrade: update this SHA to a newer commit from github.com/NousResearch/hermes-agent
-ARG HERMES_COMMIT=c23a87bc163b188abc7e40fbdccf07a9739231c3
+ARG HERMES_COMMIT=b833d85019463b101f52667390557f3fc86a25e5
 RUN curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_COMMIT}/scripts/install.sh" \
     | bash -s -- --skip-setup
 
