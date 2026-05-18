@@ -60,16 +60,17 @@ export TELEGRAM_HOME_CHANNEL_NAME="${TELEGRAM_HOME_CHANNEL_NAME:-}"
 export SELAH_API_KEY="${SELAH_API_KEY:-}"
 
 # Start web dashboard in background (port 9119, bound to all interfaces for Railway)
-echo "Starting dashboard..."
-hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure &
+echo "Railway PORT env: ${PORT:-not set}"
+DASHBOARD_PORT="${PORT:-9119}"
+echo "Starting dashboard on port $DASHBOARD_PORT..."
+hermes dashboard --host 0.0.0.0 --port "$DASHBOARD_PORT" --no-open --insecure &
 DASH_PID=$!
 sleep 3
 if kill -0 $DASH_PID 2>/dev/null; then
-  echo "Dashboard running on PID $DASH_PID"
+  echo "Dashboard running on PID $DASH_PID port $DASHBOARD_PORT"
 else
-  echo "Dashboard exited — checking if web extras are installed:"
+  echo "Dashboard exited"
   python3 -c "import uvicorn; print('uvicorn OK')" 2>&1 || echo "uvicorn missing"
-  python3 -c "import fastapi; print('fastapi OK')" 2>&1 || echo "fastapi missing"
 fi
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
