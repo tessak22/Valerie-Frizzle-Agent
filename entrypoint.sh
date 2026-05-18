@@ -60,7 +60,17 @@ export TELEGRAM_HOME_CHANNEL_NAME="${TELEGRAM_HOME_CHANNEL_NAME:-}"
 export SELAH_API_KEY="${SELAH_API_KEY:-}"
 
 # Start web dashboard in background (port 9119, bound to all interfaces for Railway)
-hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure >> /proc/1/fd/1 2>&1 &
+echo "Starting dashboard..."
+hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure &
+DASH_PID=$!
+sleep 3
+if kill -0 $DASH_PID 2>/dev/null; then
+  echo "Dashboard running on PID $DASH_PID"
+else
+  echo "Dashboard exited — checking if web extras are installed:"
+  python3 -c "import uvicorn; print('uvicorn OK')" 2>&1 || echo "uvicorn missing"
+  python3 -c "import fastapi; print('fastapi OK')" 2>&1 || echo "fastapi missing"
+fi
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
