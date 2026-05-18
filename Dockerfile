@@ -15,8 +15,8 @@ RUN curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HE
 
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Install web dashboard extras
-RUN pip install --quiet 'hermes-agent[web,pty]'
+# Install web dashboard extras (web=FastAPI/Uvicorn, pty=in-browser terminal)
+RUN pip install 'hermes-agent[web,pty]'
 
 # Build the dashboard frontend
 RUN HERMES_WEB=$(python3 -c "import hermes_cli, os; print(os.path.join(os.path.dirname(hermes_cli.__file__), 'web'))") && \
