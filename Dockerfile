@@ -13,6 +13,9 @@ ARG HERMES_COMMIT=b833d85019463b101f52667390557f3fc86a25e5
 RUN curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_COMMIT}/scripts/install.sh" \
     | bash -s -- --skip-setup
 
+# Install web dashboard extras
+RUN pip install --quiet 'hermes-agent[web,pty]'
+
 ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
@@ -23,6 +26,8 @@ RUN hermes --version
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+EXPOSE 9119
 
 # tini as PID 1: handles zombie subprocess cleanup for stdio MCP servers
 # Do NOT add startCommand in railway.json — it overrides ENTRYPOINT and prevents tini from running
