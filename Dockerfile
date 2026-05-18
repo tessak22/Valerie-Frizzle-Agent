@@ -13,10 +13,11 @@ ARG HERMES_COMMIT=b833d85019463b101f52667390557f3fc86a25e5
 RUN curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_COMMIT}/scripts/install.sh" \
     | bash -s -- --skip-setup
 
-# Install web dashboard extras
-RUN pip install --quiet 'hermes-agent[web,pty]'
-
 ENV PATH="/root/.local/bin:${PATH}"
+
+# Install web dashboard extras into Hermes's own environment
+RUN pip install --quiet '/usr/local/lib/hermes-agent[web,pty]' || \
+    pip install --user --quiet 'hermes-agent[web,pty]'
 
 WORKDIR /app
 COPY . .
