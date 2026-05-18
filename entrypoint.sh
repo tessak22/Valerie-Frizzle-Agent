@@ -60,7 +60,7 @@ export TELEGRAM_HOME_CHANNEL_NAME="${TELEGRAM_HOME_CHANNEL_NAME:-}"
 export SELAH_API_KEY="${SELAH_API_KEY:-}"
 
 # Start web dashboard in background (port 9119, bound to all interfaces for Railway)
-hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure &
+hermes dashboard --host 0.0.0.0 --port 9119 --no-open --insecure >> /proc/1/fd/1 2>&1 &
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
