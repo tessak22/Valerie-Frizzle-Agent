@@ -1,11 +1,17 @@
 model:
-  default: "anthropic/claude-sonnet-4-6"
-  provider: "anthropic"
+  default: "Hermes-4-70B"
+  provider: "nous-api"
+
+fallback_providers:
+  - provider: "nous-api"
+    model: "Hermes-4-405B"
+  - provider: "anthropic"
+    model: "claude-sonnet-4-6"
 
 agent:
   max_turns: 60
   reasoning_effort: "medium"
-  api_max_retries: 3
+  api_max_retries: 1
 
 memory:
   memory_enabled: true

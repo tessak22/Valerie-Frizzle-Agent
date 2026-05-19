@@ -23,6 +23,7 @@ cp /app/hermes/SOUL.md "$HERMES_HOME/SOUL.md"
 # Write all secrets to ~/.hermes/.env — Hermes reads from here, not system env
 cat > "$HERMES_HOME/.env" << EOF
 ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+NOUS_API_KEY=${NOUS_API_KEY:-}
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
 TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
 TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL:-}
