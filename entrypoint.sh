@@ -62,6 +62,16 @@ export SELAH_API_KEY="${SELAH_API_KEY:-}"
 # Start web dashboard in background (port 9119, bound to all interfaces for Railway)
 echo "Railway PORT env: ${PORT:-not set}"
 DASHBOARD_PORT="${PORT:-9119}"
+
+# Build dashboard frontend if not already built
+HERMES_WEB=$(python3 -c "import hermes_cli, os; print(os.path.join(os.path.dirname(hermes_cli.__file__), 'web'))" 2>/dev/null)
+HERMES_DIST=$(python3 -c "import hermes_cli, os; print(os.path.join(os.path.dirname(hermes_cli.__file__), 'web_dist'))" 2>/dev/null)
+if [ -n "$HERMES_WEB" ] && [ ! -d "$HERMES_DIST" ]; then
+  echo "Building dashboard frontend..."
+  cd "$HERMES_WEB" && npm install --silent && npm run build && cd /app
+  echo "Dashboard frontend built."
+fi
+
 echo "Starting dashboard on port $DASHBOARD_PORT..."
 hermes dashboard --host 0.0.0.0 --port "$DASHBOARD_PORT" --no-open --insecure &
 DASH_PID=$!
@@ -69,8 +79,7 @@ sleep 3
 if kill -0 $DASH_PID 2>/dev/null; then
   echo "Dashboard running on PID $DASH_PID port $DASHBOARD_PORT"
 else
-  echo "Dashboard exited"
-  python3 -c "import uvicorn; print('uvicorn OK')" 2>&1 || echo "uvicorn missing"
+  echo "Dashboard failed to start"
 fi
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
