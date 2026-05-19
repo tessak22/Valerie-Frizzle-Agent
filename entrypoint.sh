@@ -2,6 +2,7 @@
 set -euo pipefail
 
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
+TELEGRAM_STARTUP_CHECK_STRICT="${TELEGRAM_STARTUP_CHECK_STRICT:-true}"
 
 if [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
   echo "ERROR: TELEGRAM_BOT_TOKEN is required."
@@ -23,9 +24,23 @@ if [ -z "${NOUS_API_KEY:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
   exit 1
 fi
 
-# Normalize common copy/paste mistakes in numeric/id env vars.
-TELEGRAM_ALLOWED_USERS="$(echo "${TELEGRAM_ALLOWED_USERS}" | tr -d '[:space:]')"
-TELEGRAM_HOME_CHANNEL="$(echo "${TELEGRAM_HOME_CHANNEL}" | tr -d '[:space:]')"
+normalize_env_value() {
+  local value="$1"
+  value="$(printf "%s" "$value" | tr -d '\r')"
+  value="${value%\"}"
+  value="${value#\"}"
+  value="${value%\'}"
+  value="${value#\'}"
+  printf "%s" "$value"
+}
+
+# Normalize common copy/paste mistakes in Railway env vars.
+TELEGRAM_BOT_TOKEN="$(normalize_env_value "${TELEGRAM_BOT_TOKEN}")"
+TELEGRAM_ALLOWED_USERS="$(normalize_env_value "${TELEGRAM_ALLOWED_USERS}" | tr -d '[:space:]')"
+TELEGRAM_HOME_CHANNEL="$(normalize_env_value "${TELEGRAM_HOME_CHANNEL}" | tr -d '[:space:]')"
+TELEGRAM_HOME_CHANNEL_NAME="$(normalize_env_value "${TELEGRAM_HOME_CHANNEL_NAME:-}")"
+NOUS_API_KEY="$(normalize_env_value "${NOUS_API_KEY:-}")"
+ANTHROPIC_API_KEY="$(normalize_env_value "${ANTHROPIC_API_KEY:-}")"
 
 # Create directories Hermes expects (volume is empty on first deploy)
 mkdir -p "$HERMES_HOME/memories" \
@@ -102,6 +117,8 @@ telegram_api_call() {
 }
 
 telegram_preflight() {
+  echo "Telegram preflight: home_channel=${TELEGRAM_HOME_CHANNEL} allowed_users=${TELEGRAM_ALLOWED_USERS}"
+
   local me_response
   me_response="$(telegram_api_call getMe)"
   if echo "$me_response" | grep -q '"ok":true'; then
@@ -153,37 +170,67 @@ send_telegram_startup_check() {
 
   if echo "$response" | grep -q '"ok":true'; then
     echo "Telegram startup check delivered."
+    return 0
   else
     echo "WARNING: Telegram startup check failed."
     echo "Telegram response: $response"
+    if [ "$TELEGRAM_STARTUP_CHECK_STRICT" = "true" ]; then
+      echo "ERROR: Strict Telegram startup check is enabled; aborting boot."
+      exit 1
+    fi
+    return 1
   fi
 }
 
 telegram_preflight
 send_telegram_startup_check
 
-# Start web dashboard in background (port 9119, bound to all interfaces for Railway)
-echo "Railway PORT env: ${PORT:-not set}"
-DASHBOARD_PORT="${PORT:-9119}"
+start_dashboard_non_blocking() {
+  echo "Railway PORT env: ${PORT:-not set}"
+  DASHBOARD_PORT="${PORT:-9119}"
 
-# Build dashboard frontend if not already built
-HERMES_DIR="/usr/local/lib/python3.13/site-packages/hermes_cli"
-if [ ! -d "${HERMES_DIR}/web_dist" ]; then
-  echo "Building dashboard frontend..."
-  cd "${HERMES_DIR}/web" && npm install --silent && npm run build
-  echo "Dashboard frontend built."
-  cd /app
-fi
+  local hermes_dir
+  hermes_dir="$(python3 - << 'PY'
+import os
+import sys
+try:
+    import hermes_cli
+    print(os.path.dirname(hermes_cli.__file__))
+except Exception:
+    sys.exit(1)
+PY
+  )"
 
-echo "Starting dashboard on port $DASHBOARD_PORT..."
-hermes dashboard --host 0.0.0.0 --port "$DASHBOARD_PORT" --no-open --insecure &
-DASH_PID=$!
-sleep 3
-if kill -0 $DASH_PID 2>/dev/null; then
-  echo "Dashboard running on PID $DASH_PID port $DASHBOARD_PORT"
-else
-  echo "Dashboard failed to start"
-fi
+  if [ -z "${hermes_dir}" ] || [ ! -d "${hermes_dir}" ]; then
+    echo "WARNING: Could not resolve hermes_cli path; skipping dashboard startup."
+    return 0
+  fi
+
+  if [ ! -d "${hermes_dir}/web_dist" ]; then
+    echo "Dashboard frontend missing; building in best-effort mode..."
+    if (cd "${hermes_dir}/web" && npm install --silent && npm run build); then
+      echo "Dashboard frontend built."
+    else
+      echo "WARNING: Dashboard frontend build failed; continuing with gateway only."
+      return 0
+    fi
+  fi
+
+  echo "Starting dashboard on port ${DASHBOARD_PORT}..."
+  if hermes dashboard --host 0.0.0.0 --port "${DASHBOARD_PORT}" --no-open --insecure >/proc/1/fd/1 2>/proc/1/fd/2 & then
+    DASH_PID=$!
+    sleep 3
+    if kill -0 "${DASH_PID}" 2>/dev/null; then
+      echo "Dashboard running on PID ${DASH_PID} port ${DASHBOARD_PORT}"
+    else
+      echo "WARNING: Dashboard exited early; continuing with gateway only."
+    fi
+  else
+    echo "WARNING: Dashboard failed to launch; continuing with gateway only."
+  fi
+}
+
+start_dashboard_non_blocking
 
 echo "Ms. Frizzle is getting on the bus... 🚌"
 exec hermes gateway run
