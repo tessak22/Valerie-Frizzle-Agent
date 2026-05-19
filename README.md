@@ -22,8 +22,10 @@ That's it. No code, no terminal.
 
 ## Getting your keys
 
-**Anthropic API key** (`ANTHROPIC_API_KEY`)
-Go to [console.anthropic.com](https://console.anthropic.com), create an account, and generate an API key.
+**Model API key** (`NOUS_API_KEY` or `ANTHROPIC_API_KEY`)
+Provide at least one model provider key:
+1. `NOUS_API_KEY` (optional, enables Hermes-4 models as primary)
+2. `ANTHROPIC_API_KEY` (required if `NOUS_API_KEY` is not set) from [console.anthropic.com](https://console.anthropic.com)
 
 **Telegram bot** (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, `TELEGRAM_HOME_CHANNEL`)
 1. Open Telegram and message [@BotFather](https://t.me/BotFather)

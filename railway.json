@@ -10,6 +10,9 @@
   "environments": {
     "production": {
       "variables": {
+        "NOUS_API_KEY": {
+          "description": "Optional Nous API key — enables Hermes-4 models as primary when provided"
+        },
         "ANTHROPIC_API_KEY": {
           "description": "Your Anthropic API key — get one at console.anthropic.com"
         },
