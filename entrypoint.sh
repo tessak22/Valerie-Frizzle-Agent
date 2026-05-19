@@ -64,12 +64,12 @@ echo "Railway PORT env: ${PORT:-not set}"
 DASHBOARD_PORT="${PORT:-9119}"
 
 # Build dashboard frontend if not already built
-HERMES_WEB=$(python3 -c "import hermes_cli, os; print(os.path.join(os.path.dirname(hermes_cli.__file__), 'web'))" 2>/dev/null)
-HERMES_DIST=$(python3 -c "import hermes_cli, os; print(os.path.join(os.path.dirname(hermes_cli.__file__), 'web_dist'))" 2>/dev/null)
-if [ -n "$HERMES_WEB" ] && [ ! -d "$HERMES_DIST" ]; then
+HERMES_DIR="/usr/local/lib/python3.13/site-packages/hermes_cli"
+if [ ! -d "${HERMES_DIR}/web_dist" ]; then
   echo "Building dashboard frontend..."
-  cd "$HERMES_WEB" && npm install --silent && npm run build && cd /app
+  cd "${HERMES_DIR}/web" && npm install --silent && npm run build
   echo "Dashboard frontend built."
+  cd /app
 fi
 
 echo "Starting dashboard on port $DASHBOARD_PORT..."
